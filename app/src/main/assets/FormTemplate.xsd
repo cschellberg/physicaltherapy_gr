@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	targetNamespace="http://www.agileapps.com/FormTemplates" xmlns="http://www.agileapps.com/FormTemplates"
+	elementFormDefault="qualified">
+
+	<xs:element name="FormTemplate">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="id" type="xs:int" />
+				<xs:element name="clientId" type="xs:int" />
+				<xs:element name="dateString"  type="xs:string"  />
+				<xs:element name="formName"  type="xs:string" />
+				<xs:element name="permanent"  type="xs:boolean" />
+				<xs:element name="formTemplatePartList">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="formTemplatePart" type="FormTemplatePart"
+								minOccurs="1" maxOccurs="unbounded" />
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:complexType name="FormTemplatePart">
+		<xs:sequence>
+			<xs:element name="id" type="xs:int" />
+			<xs:element name="title" type="xs:string" />
+			<xs:element name="questionAnswerList">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="questionAnswer" type="QuestionAnswer"
+							minOccurs="1" maxOccurs="unbounded" />
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+
+	<xs:complexType name="QuestionAnswer">
+		<xs:sequence>
+			<xs:element name="id" type="xs:int"></xs:element>
+			<xs:element name="inputType" type="inputType"></xs:element>
+			<xs:element name="keyIndex" type="xs:string" ></xs:element>
+			<xs:element name="answerWidth" type="xs:string" ></xs:element>
+			<xs:element name="question" type="xs:string" minOccurs="1" maxOccurs="1" ></xs:element>
+			<xs:element name="answer" type="xs:string" ></xs:element>
+			<xs:element name="choiceList">
+			<xs:complexType>
+					<xs:sequence>
+						<xs:element name="choice" type="xs:string"
+							minOccurs="0" maxOccurs="unbounded" />
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+
+<xs:simpleType name="inputType">
+      <xs:restriction base="xs:string">
+         <xs:enumeration value="TEXT"/>
+         <xs:enumeration value="EMAIL"/>
+         <xs:enumeration value="INTEGER"/>
+         <xs:enumeration value="FLOAT"/>
+         <xs:enumeration value="PHONE"/>
+         <xs:enumeration value="RADIO"/>
+         <xs:enumeration value="CHECKBOX"/>
+       </xs:restriction>
+   </xs:simpleType> 
+</xs:schema>

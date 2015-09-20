@@ -1,0 +1,56 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+   >
+
+ 
+         <TextView
+        android:id="@+id/textView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/section_label"
+        android:text="Enter Number"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+         
+
+         <EditText
+             android:id="@+id/someNumber"
+             android:layout_width="wrap_content"
+             android:layout_height="wrap_content"
+             android:layout_alignBottom="@+id/textView1"
+              android:layout_marginLeft="10dp"
+             android:ems="7"
+             android:inputType="number"
+             android:maxLength="2" >
+
+        <requestFocus />
+    </EditText>
+    <ImageButton
+             android:id="@+id/btnSpeak"
+             android:layout_width="wrap_content"
+             android:layout_height="wrap_content"
+              android:layout_marginLeft="20dp"
+             android:src="@drawable/ic_launcher" />
+             
+    <Button
+        android:id="@+id/btnSave"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/textView1"
+        android:layout_toRightOf="@+id/section_label"
+        android:layout_marginLeft="10dp"
+        android:text="Save" />
+
+       <Button
+        android:id="@+id/btnCancel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/textView1"
+        android:layout_toRightOf="@+id/section_label"
+        android:layout_marginLeft="10dp"
+        android:text="Cancel" />
+    
+
+</LinearLayout>

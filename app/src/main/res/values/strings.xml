@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">PhysicalTherapy</string>
+    <string name="action_settings">Settings</string>
+    <string name="print_form">Print Form</string>
+    <string name="clear_form">Clear Form</string>
+    <string name="clear_form_partial">Clear Form Partially</string>
+    <string name="save_form">Save Form</string>
+    <string name="exit_app">Exit App</string>
+    <string name="form_chooser">Form Chooser</string>
+    <string name="retrieve_or_delete">Retrieve or Delete an Existing Form</string>
+    <string name="client_label">Client</string>
+    <string name="form_label">Form</string>
+     <string name="date_label">Date</string>
+     <string name="file_label">File</string>
+    <string name="view_form">View Form</string>
+    <string name="delete_form">Delete Form</string>
+    <string name="save_config">Save Config</string>
+     <string name="home">Home</string>
+     <string name="company_label">Company</string>
+     <string name="default_form_label">Default Form</string>
+     <string name="default_client_info_label">Client Info Form</string>
+     <string name="cancel">Cancel</string>
+     <string name="configuration">Configuration</string>
+     <string name="template_url_label">Template URL</string>
+     <string name="template_downloader">Template Downloader</string>
+     <string name="download_templates">Download Templates</string>
+     <string name="download_template">Download Template</string>
+     <string name="template_label">Template</string>
+     <string name="change_template">Change Template</string>
+      <string name="delete_template">Delete Template</string>
+</resources>

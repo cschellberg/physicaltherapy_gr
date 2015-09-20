@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FormTemplate>
+    <formName>Default Client Info</formName>
+    <clientId>1</clientId>
+    <permanent>true</permanent>
+	<id>1</id>
+	<formTemplatePartList>
+		<formTemplatePart>
+			<id>1</id>
+			<title>Client information</title>
+			<questionAnswerList>
+				<questionAnswer>
+					<id>1</id>
+					<inputType>TEXT</inputType>
+					<question>Last Name</question>
+					<keyIndex>0</keyIndex>
+					<answer></answer>
+				</questionAnswer>
+				<questionAnswer>
+					<id>2</id>
+					<inputType>TEXT</inputType>
+					<question>First Name</question>
+					<keyIndex>1</keyIndex>
+					<answer></answer>
+				</questionAnswer>
+				<questionAnswer>
+					<id>3</id>
+					<inputType>PHONE</inputType>
+					<question>Phone Number</question>
+					<keyIndex>2</keyIndex>
+					<answer></answer>
+				</questionAnswer>
+				<questionAnswer>
+					<id>4</id>
+					<inputType>TEXT</inputType>
+					<question>Address</question>
+					<answer></answer>
+				</questionAnswer>
+				<questionAnswer>
+					<id>5</id>
+					<inputType>TEXT</inputType>
+					<question>City</question>
+					<answer></answer>
+				</questionAnswer>
+				<questionAnswer>
+					<id>6</id>
+					<inputType>TEXT</inputType>
+					<question>State</question>
+					<answer></answer>
+				</questionAnswer>
+				<questionAnswer>
+					<id>7</id>
+					<inputType>TEXT</inputType>
+					<question>Zip</question>
+					<answer></answer>
+				</questionAnswer>
+				<questionAnswer>
+					<id>8</id>
+					<inputType>TEXT</inputType>
+					<question>DOB</question>
+					<answer></answer>
+				</questionAnswer>
+				<questionAnswer>
+					<id>9</id>
+					<inputType>TEXT</inputType>
+					<question>Sex</question>
+					<answer></answer>
+				</questionAnswer>
+				<questionAnswer>
+					<id>10</id>
+					<inputType>TEXT</inputType>
+					<question>Height</question>
+					<answer></answer>
+				</questionAnswer>
+				<questionAnswer>
+					<id>11</id>
+					<inputType>INTEGER</inputType>
+					<question>Weight</question>
+					<answer></answer>
+					<answerWidth>500</answerWidth>
+				</questionAnswer>
+				<questionAnswer>
+					<id>12</id>
+					<inputType>TEXT</inputType>
+					<question>Insurance</question>
+					<answer></answer>
+				</questionAnswer>
+				<questionAnswer>
+					<id>13</id>
+					<inputType>TEXT</inputType>
+					<question>Social Security</question>
+					<answer></answer>
+				</questionAnswer>
+			</questionAnswerList>
+		</formTemplatePart>
+		</formTemplatePartList>
+		</FormTemplate>

@@ -1,0 +1,30 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+ <item
+        android:id="@+id/action_settings"
+        android:title="@string/action_settings"/>
+    <item
+        android:id="@+id/print_template"
+        android:title="@string/print_form"/>
+    <item
+        android:id="@+id/clear_template"
+        android:title="@string/clear_form"/>
+    <item
+        android:id="@+id/clear_template_partial"
+        android:title="@string/clear_form_partial"/>
+    <item
+        android:id="@+id/save_template"
+        android:title="@string/save_form"/>
+    <item
+        android:id="@+id/retrieve_or_delete"
+        android:title="@string/retrieve_or_delete"/>
+     <item
+        android:id="@+id/change_template"
+        android:title="@string/change_template"/>
+    <item
+        android:id="@+id/download_templates"
+        android:title="@string/download_templates"/>
+     <item
+        android:id="@+id/exit_app"
+        android:title="@string/exit_app"/>
+   
+</menu>
