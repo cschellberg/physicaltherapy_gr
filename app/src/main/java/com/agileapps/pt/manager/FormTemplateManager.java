@@ -3,6 +3,7 @@ package com.agileapps.pt.manager;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -137,6 +138,15 @@ public class FormTemplateManager {
 		currentFormTemplate=formTemplate;
 
 	}
+
+	public static void loadForm(InputStream is) throws FileNotFoundException,
+			Exception {
+		FormTemplate formTemplate = PhysicalTherapyUtils
+				.parseFormTemplate(is);
+		temporaryFormTemplateOverride=formTemplate.getFormName();
+		currentFormTemplate=formTemplate;
+	}
+
 
 	public static void deleteTemplate(String formName)
 	{

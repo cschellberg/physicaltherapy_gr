@@ -1,5 +1,8 @@
 package com.agileapps.pt;
 
+import com.agileapps.pt.exceptions.GoogleDriverException;
+import com.agileapps.pt.pojos.GoogleFileType;
+import com.agileapps.pt.util.GoogleDriver;
 import com.agileapps.pt.util.PhysicalTherapyUtils;
 import com.google.android.gms.common.Scopes;
 import com.google.android.gms.common.api.PendingResult;
@@ -79,11 +82,10 @@ public class MainActivity extends FragmentActivity implements GoogleApiClient.Co
     public static final int REQUEST_AUTHORIZATION = 3;
     public static final int RESULT_STORE_FILE = 4;
     public static final String FORM_DIR = "pt_forms";
-    private GoogleApiClient googleClient;
+    static GoogleApiClient googleClient;
     private static final int RESOLVE_CONNECTION_REQUEST_CODE = 19;
     static int idCounter = 90000;
     public static final String FRAGMENT_PREFIX = "template_part_";
-    private DriveId ptStorageDriveId;
 
 
     InputType answerWidgetDataType = null;
@@ -151,9 +153,9 @@ public class MainActivity extends FragmentActivity implements GoogleApiClient.Co
     @Override
     protected void onStop() {
         super.onStop();
-        if (googleClient.isConnected()) {
+        /*if (googleClient.isConnected()) {
             googleClient.disconnect();
-        }
+        }*/
     }
 
     private List<Fragment> getFragments() {
@@ -169,54 +171,6 @@ public class MainActivity extends FragmentActivity implements GoogleApiClient.Co
         }
         return retList;
     }
-    /*
-    private void createFragments() {
-        FormTemplate formTemplate = getFormTemplate();
-        if (formTemplate == null) {
-            return;
-        }
-        FragmentManager fragmentManager = this.getSupportFragmentManager();
-        sectionsPagerAdapter = new SectionsPagerAdapter(fragmentManager);
-        mViewPager = (ViewPager) findViewById(R.id.pager);
-        mViewPager.setAdapter(sectionsPagerAdapter);
-        for (int ii = 0; ii < formTemplate.getFormTemplatePartList().size(); ii++) {
-            getFragment(ii);
-        }
-     }
-
-    private Fragment getFragment(int position) {
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        String tag = FRAGMENT_PREFIX + position;
-        Fragment genericFragment = null;
-        Log.i(PT_APP_INFO, "Retrieving fragment " + tag);
-        genericFragment = fragmentManager.findFragmentByTag(tag);
-        if (genericFragment != null) {
-            Log.i(PT_APP_INFO, "Found fragment " + tag + "  in fragment manager is added " + genericFragment.isAdded());
-            return genericFragment;
-        } else {
-            try {
-                Log.i(PT_APP_INFO, "Fragment not found creating " + tag+ " fragment manager has "+
-                        ((fragmentManager.getFragments()!=null)?String.valueOf(fragmentManager.getFragments().size()) :"Not initialized"));
-                FragmentTransaction fragmentTransaction = fragmentManager
-                        .beginTransaction();
-                genericFragment = new GenericFragmentImpl();
-                fragmentTransaction.add(R.id.myfragment, genericFragment, tag);
-                Log.i(PT_APP_INFO, "Added fragment " + genericFragment.getTag());
-                fragmentTransaction.commit();
-                genericFragment = fragmentManager.findFragmentByTag(tag);
-                if ( genericFragment == null ){
-                    Log.e(PT_APP_INFO, "Transaction was added but not found ! ");
-                }else{
-                    Log.e(PT_APP_INFO, "Transaction was added and found ! ");
-                }
-            } catch (Throwable ex) {
-                String errorMessage = "Could not add fragment because " + ex;
-                Toast.makeText(this, "Could not add fragment because " + ex, Toast.LENGTH_LONG);
-                Log.e(PT_APP_INFO, errorMessage, ex);
-            }
-            return genericFragment;
-        }
-    }*/
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -260,6 +214,7 @@ public class MainActivity extends FragmentActivity implements GoogleApiClient.Co
                     saveForm(formTemplate);
                     break;
                 case R.id.retrieve_or_delete:
+                    GoogleDriver.getInstance(googleClient).getAllForms(googleClient);
                     Intent retrieveFormIntent = new Intent(this,
                             FormChooserActivity.class);
                     startActivity(retrieveFormIntent);
@@ -298,73 +253,15 @@ public class MainActivity extends FragmentActivity implements GoogleApiClient.Co
     }
 
 
-    private void saveForm(FormTemplate formTemplate) throws IOException {
-        //FileOutputStream fos = null;
+    private void saveForm(FormTemplate formTemplate)  {
         try {
-            /*String filePath = PhysicalTherapyUtils.getFilePath(formTemplate)
-                    .getAbsolutePath();
-            File filesDir = new File(Environment.getExternalStorageDirectory(),
-                    FORM_DIR);
-            File formFile = new File(filesDir, filePath);
-            if (!filesDir.exists()) {
-                if (!filesDir.mkdir()) {
-                    Log.e(PT_APP_INFO, "Unable to create pt_forms directory");
-                }
-            }
-            if (!formFile.getParentFile().mkdirs()) {
-                Log.e(PT_APP_INFO, "Cannot create directories "
-                        + formFile.getParentFile().getAbsolutePath());
-            }
-            fos = new FileOutputStream(formFile);*/
-            final FormTemplate formToSave=formTemplate;
-            final DriveFolder driveFolder = DriveApi.getRootFolder(googleClient);
-            Query.Builder queryBuilder=new Query.Builder();
-            queryBuilder.addFilter(Filters.eq(SearchableField.TITLE, "pt_storage"));
-            Query query=queryBuilder.build();
-            driveFolder.queryChildren(googleClient,query).setResultCallback(new ResultCallback<MetadataBufferResult>() {
-                @Override
-                public void onResult(MetadataBufferResult resultBufferResult) {
-                    Log.i(PT_APP_INFO,"Results return is "+resultBufferResult.getMetadataBuffer().getCount());
-                    for (Metadata result :resultBufferResult.getMetadataBuffer()) {
-                        ptStorageDriveId = result.getDriveId();
-                    }
-                    if (ptStorageDriveId == null){
-                        MetadataChangeSet.Builder builder=new MetadataChangeSet.Builder();
-                        builder.setTitle("pt_storage");
-                        driveFolder.createFolder(googleClient,builder.build());
-                    }else{
-                         PendingResult<DriveApi.DriveContentsResult> driveContentsResults=DriveApi.newDriveContents(googleClient);
-                        driveContentsResults.setResultCallback(new ResultCallback<DriveApi.DriveContentsResult>(){
-                            public void onResult (DriveApi.DriveContentsResult result){
-                                DriveFolder ptFolder=DriveApi.getFolder(googleClient, ptStorageDriveId);
-                                DriveContents driveContents=result.getDriveContents();
-                                Persister persister = new Persister();
-                                try {
-                                    persister.write(formToSave, driveContents.getOutputStream());
-                                }catch(Exception ex){
-                                    Log.e(PT_APP_INFO,"Unable to save file because "+ex);
-                                }
-                                MetadataChangeSet.Builder builder=new MetadataChangeSet.Builder();
-                                String fileName = PhysicalTherapyUtils.getFileName(formToSave);
-                                 builder.setTitle(fileName);
-                                ptFolder.createFile(googleClient,builder.build(),driveContents);
-
-
-                            }
-
-
-                        });
-                    }
-                }
-            });
-                Persister persister = new Persister();
-                //persister.write(formTemplate, fos);
-            }catch (Exception ex) {
-            Log.e(PT_APP_INFO, "Unable to connect to google drive because  " + ex);
-        } finally {
-            /*if (fos != null) {
-                fos.close();
-            }*/
+            FormTemplate formToSave = formTemplate;
+            GoogleDriver googleDriver = GoogleDriver.getInstance(googleClient);
+            googleDriver.saveOrUpdate(formToSave, googleClient, GoogleFileType.FORM);
+        }catch(Exception ex){
+            String errorStr="Cannot save form because " +ex;
+            Log.e(PT_APP_INFO,errorStr,ex);
+            Toast.makeText(this,errorStr,Toast.LENGTH_LONG).show();
         }
     }
 
@@ -439,6 +336,18 @@ public class MainActivity extends FragmentActivity implements GoogleApiClient.Co
     @Override
     public void onConnected(Bundle bundle) {
         Log.i(PT_APP_INFO, "Connected to drive");
+        try
+        {
+            GoogleDriver googleDriver=GoogleDriver.getInstance(googleClient);
+        } catch (Exception ex) {
+            String errorStr = "Cannot connect to google drive because "
+                    + ex.getMessage();
+            Log.e(PT_APP_INFO, errorStr, ex);
+            Toast toast = Toast.makeText(getApplicationContext(), errorStr,
+                    Toast.LENGTH_LONG);
+            toast.show();
+        }
+
     }
 
     @Override

@@ -47,7 +47,7 @@ public class PhysicalTherapyUtils {
 		if ( StringUtils.isBlank(formTemplate.getFormName())){
 			throw new TemplateConfigurationException("Form has no name.  Please check template to make sure it is specified");
 		}
-		sb.append(clientKey).append("_").append(dateString).append(XML_EXTENSION);
+		sb.append(clientKey).append("-").append(formTemplate.getFormName().toUpperCase()).append("-").append(dateString).append(XML_EXTENSION);
 		return sb.toString();
 	}
 
@@ -173,4 +173,13 @@ public class PhysicalTherapyUtils {
 		return retValue;
 	}
 
+	public static MapOfMaps getMapOfMaps(List<String> stringList){
+		MapOfMaps mapOfMaps=new MapOfMaps();
+		for (String str:stringList){
+			String arr[]=str.split("[-.]");
+			arr[arr.length-1]=str;
+			mapOfMaps.add(arr);
+		}
+		return mapOfMaps;
+	}
 }

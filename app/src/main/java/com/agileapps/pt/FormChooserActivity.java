@@ -5,7 +5,11 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.agileapps.pt.exceptions.GoogleDriverException;
 import com.agileapps.pt.manager.FormTemplateManager;
+import com.agileapps.pt.util.GoogleDriver;
+import com.agileapps.pt.util.MapOfMaps;
+import com.agileapps.pt.util.PhysicalTherapyUtils;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -25,6 +29,8 @@ import android.widget.Toast;
 public class FormChooserActivity extends Activity {
 
 	private static final String NONE_SELECTED = "None selected";
+
+	private MapOfMaps mapOfMaps;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -87,15 +93,8 @@ public class FormChooserActivity extends Activity {
 						|| fileString.equals(NONE_SELECTED)) {
 					return;
 				}
-				File filesDir = new File(Environment
-						.getExternalStorageDirectory(), MainActivity.FORM_DIR);
-				String filePath = clientString + "/" + formString + "/"
-						+ dateString+"/"+fileString;
-				File formFile = new File(filesDir, filePath);
 				try {
-					FormTemplateManager.loadForm(formFile);
-					Intent intent = new Intent(FormChooserActivity.this, MainActivity.class);
-					startActivity(intent);
+					GoogleDriver.getInstance(MainActivity.googleClient).loadForm(MainActivity.googleClient,FormChooserActivity.this, fileString);
 					finish();
 				} catch (Exception ex) {
 					String errorStr="Unable to retrieve form because "+ex;
@@ -128,8 +127,15 @@ public class FormChooserActivity extends Activity {
 				MainActivity.FORM_DIR);
 		List<String> clientList = new ArrayList<String>();
 		clientList.add(NONE_SELECTED);
-		for (File file : filesDir.listFiles()) {
-			clientList.add(file.getName());
+		try {
+			mapOfMaps=PhysicalTherapyUtils.getMapOfMaps(GoogleDriver.
+					getInstance(MainActivity.googleClient).getAllForms(MainActivity.googleClient));
+			clientList.addAll(mapOfMaps.get().keySet());
+		}catch(GoogleDriverException ex){
+			String errorStr="Cannot get list of forms from google drive because"+ex;
+			Log.e(MainActivity.PT_APP_INFO,errorStr);
+			Toast.makeText(this,errorStr,Toast.LENGTH_LONG).show();
+			return;
 		}
 		String[] items = new String[clientList.size()];
 		clientList.toArray(items);
@@ -145,14 +151,9 @@ public class FormChooserActivity extends Activity {
 				if (selectedItemString.equals(NONE_SELECTED)) {
 					return;
 				}
-				File filesDir = new File(Environment
-						.getExternalStorageDirectory(), MainActivity.FORM_DIR);
-				File formsDir = new File(filesDir, selectedItemString);
 				List<String> formList = new ArrayList<String>();
 				formList.add(NONE_SELECTED);
-				for (File formDir : formsDir.listFiles()) {
-					formList.add(formDir.getName());
-				}
+				formList.addAll(mapOfMaps.get(new String[]{selectedItemString}).keySet());
 				String[] items = new String[formList.size()];
 				formList.toArray(items);
 				ArrayAdapter<String> adapter = new ArrayAdapter<String>(
@@ -173,15 +174,10 @@ public class FormChooserActivity extends Activity {
 				if (formString.equals(NONE_SELECTED)) {
 					return;
 				}
-				File filesDir = new File(Environment
-						.getExternalStorageDirectory(), MainActivity.FORM_DIR);
-				File formsDir = new File(filesDir, clientString + "/"
-						+ formString);
+
 				List<String> dateList = new ArrayList<String>();
 				dateList.add(NONE_SELECTED);
-				for (File formDir : formsDir.listFiles()) {
-					dateList.add(formDir.getName());
-				}
+				dateList.addAll(mapOfMaps.get(new String[]{clientString,formString}).keySet());
 				String[] items = new String[dateList.size()];
 				dateList.toArray(items);
 				ArrayAdapter<String> adapter = new ArrayAdapter<String>(
@@ -205,16 +201,9 @@ public class FormChooserActivity extends Activity {
 				if (dateString.equals(NONE_SELECTED)) {
 					return;
 				}
-				File filesDir = new File(Environment
-						.getExternalStorageDirectory(), MainActivity.FORM_DIR);
-				String filePath = clientString + "/" + formString + "/"
-						+ dateString;
-				File datesDir = new File(filesDir, filePath);
 				List<String> fileList = new ArrayList<String>();
 				fileList.add(NONE_SELECTED);
-				for (File fileDir : datesDir.listFiles()) {
-					fileList.add(fileDir.getName());
-				}
+				fileList.addAll(mapOfMaps.get(new String[]{clientString,formString,dateString}).keySet());
 				String[] items = new String[fileList.size()];
 				fileList.toArray(items);
 				ArrayAdapter<String> adapter = new ArrayAdapter<String>(
@@ -228,7 +217,7 @@ public class FormChooserActivity extends Activity {
 		});
 		fileSelector.setOnItemSelectedListener(new OnItemSelectedListener() {
 			public void onItemSelected(AdapterView<?> arg0, View arg1,
-					int arg2, long arg3) {
+									   int arg2, long arg3) {
 			}
 
 			public void onNothingSelected(AdapterView<?> arg0) {
