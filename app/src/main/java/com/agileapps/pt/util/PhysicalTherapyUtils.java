@@ -26,6 +26,9 @@ public class PhysicalTherapyUtils {
 
 	public static FormTemplate parseFormTemplate(InputStream is)
 			throws Exception {
+		if ( is == null ){
+            return null;
+		}
 		Serializer serial = new Persister();
 		StringBuilder sb = new StringBuilder();
 		Scanner scanner=new Scanner(is);

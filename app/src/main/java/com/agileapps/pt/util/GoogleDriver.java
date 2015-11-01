@@ -1,5 +1,6 @@
 package com.agileapps.pt.util;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
@@ -32,7 +33,9 @@ import org.simpleframework.xml.core.Persister;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by dschellb on 9/26/2015.
@@ -41,12 +44,12 @@ public class GoogleDriver {
 
     private final static String STORAGE_DIR = "pt_storage";
     private final static String REPORT_DIR = "pt_report";
-    private static final long SYNC_INTERVAL = 120000l ;
+    private static final long SYNC_INTERVAL = 120000l;
     private DriveId storageDriveId;
     private DriveId reportDriveId;
-    private List<String>formNames=new ArrayList<String>();
+    private List<String> formNames = new ArrayList<String>();
     private static GoogleDriver googleDriver;
-    private long lastSync=0;
+    private long lastSync = 0;
 
     private GoogleDriver() {
     }
@@ -64,14 +67,14 @@ public class GoogleDriver {
         if (googleDriver.reportDriveId == null) {
             googleDriver.setReportDirectory(googleClient);
         }
-        if ((System.currentTimeMillis()-googleDriver.lastSync) >= SYNC_INTERVAL) {
+        if ((System.currentTimeMillis() - googleDriver.lastSync) >= SYNC_INTERVAL) {
             Drive.DriveApi.requestSync(googleClient).setResultCallback(new ResultCallback<Status>() {
                 @Override
                 public void onResult(Status status) {
-                    Log.i(MainActivity.PT_APP_INFO,"Synched with google drive.  Status is "+status);
+                    Log.i(MainActivity.PT_APP_INFO, "Synched with google drive.  Status is " + status);
                 }
             });
-            googleDriver.lastSync=System.currentTimeMillis();
+            googleDriver.lastSync = System.currentTimeMillis();
         }
         return googleDriver;
     }
@@ -83,12 +86,13 @@ public class GoogleDriver {
         Query query = queryBuilder.build();
         try {
             final DriveFolder driveFolder = Drive.DriveApi.getRootFolder(googleClient);
-             driveFolder.queryChildren(googleClient, query).setResultCallback(new ResultCallback<DriveApi.MetadataBufferResult>() {
+            driveFolder.queryChildren(googleClient, query).setResultCallback(new ResultCallback<DriveApi.MetadataBufferResult>() {
                 @Override
                 public void onResult(DriveApi.MetadataBufferResult resultBufferResult) {
                     for (Metadata result : resultBufferResult.getMetadataBuffer()) {
                         if (result.getTitle().equals(STORAGE_DIR)) {
                             storageDriveId = result.getDriveId();
+                            getAllForms(googleClient);
                         }
                     }
                     if (storageDriveId == null) {
@@ -181,22 +185,30 @@ public class GoogleDriver {
         });
     }
 
-    public  List<String> getAllForms(GoogleApiClient googleClient){
-        final List<String>tmpFormNames=new ArrayList<String>();
+    public List<String> getAllForms(GoogleApiClient googleClient) {
         final DriveFolder driveFolder = Drive.DriveApi.getFolder(googleClient, storageDriveId);
         driveFolder.listChildren(googleClient).setResultCallback(new ResultCallback<DriveApi.MetadataBufferResult>() {
             @Override
             public void onResult(DriveApi.MetadataBufferResult resultBufferResult) {
+                Set<String> tmpFormNames = new HashSet<String>();
                 for (Metadata result : resultBufferResult.getMetadataBuffer()) {
-                   tmpFormNames.add(result.getTitle());
-                 }
-                formNames=tmpFormNames;
-            }});
+                    tmpFormNames.add(result.getTitle());
+                }
+                for (String formName:LocalDriver.loadFormNamesFromLocalStorage()){
+                    tmpFormNames.add(formName);
+                }
+                formNames.addAll(tmpFormNames);
+            }
+        });
+        if (formNames.size() == 0){
+            formNames=LocalDriver.loadFormNamesFromLocalStorage();
+        }
         return formNames;
     }
 
     public void saveOrUpdate(final FormTemplate formToSave, final GoogleApiClient googleClient,
                              final GoogleFileType googleFileType) throws GoogleDriverException {
+        LocalDriver.save(formToSave, googleFileType,null);
         if (storageDriveId == null) {
             throw new GoogleDriverException("Cannot found form directory on google drive");
         }
@@ -232,36 +244,66 @@ public class GoogleDriver {
 
     }
 
-    public void loadForm(final GoogleApiClient googleClient,final Context context,final String formName){
+    public void loadForm(final GoogleApiClient googleClient, final Activity activity, final String formName) {
+        if (loadFormFromLocalStorage(activity,formName)){
+            return;
+        }
         Query.Builder queryBuilder = new Query.Builder();
-        Log.i(MainActivity.PT_APP_INFO,"Load form from cloud.  Google client state "+googleClient.isConnected());
+        Log.i(MainActivity.PT_APP_INFO, "Load form from cloud.  Google client state " + googleClient.isConnected());
         queryBuilder.addFilter(Filters.eq(SearchableField.TITLE, formName));
         Query query = queryBuilder.build();
-             final DriveFolder driveFolder = Drive.DriveApi.getFolder(googleClient, storageDriveId);
-            driveFolder.queryChildren(googleClient, query).setResultCallback(new ResultCallback<DriveApi.MetadataBufferResult>() {
-                @Override
-                public void onResult(DriveApi.MetadataBufferResult resultBufferResult) {
-                    if (resultBufferResult.getMetadataBuffer().getCount() > 0) {
-                        DriveFile driveFile=Drive.DriveApi.getFile(googleClient, resultBufferResult.getMetadataBuffer().get(0).getDriveId());
-                        driveFile.open(googleClient,DriveFile.MODE_READ_ONLY,null)
-                                .setResultCallback(new ResultCallback<DriveApi.DriveContentsResult>() {
-                                    @Override
-                                    public void onResult(DriveApi.DriveContentsResult driveContentsResult) {
-                                        try {
-                                            InputStream is = driveContentsResult.getDriveContents().getInputStream();
-                                            FormTemplateManager.loadForm(is);
-                                            Intent intent = new Intent(context, MainActivity.class);
-                                            context.startActivity(intent);
-                                        }catch(Throwable th){
-                                            String errorStr="Unable to retrieve form "+formName+ " because "+th;
-                                            Log.e(MainActivity.PT_APP_INFO,errorStr);
-                                            Toast.makeText(context, errorStr,Toast.LENGTH_LONG).show();
-                                        }
+        final DriveFolder driveFolder = Drive.DriveApi.getFolder(googleClient, storageDriveId);
+        Toast.makeText(activity,"Loading "+formName+" from google drive... ", Toast.LENGTH_LONG).show();
+        driveFolder.queryChildren(googleClient, query).setResultCallback(new ResultCallback<DriveApi.MetadataBufferResult>() {
+            @Override
+            public void onResult(DriveApi.MetadataBufferResult resultBufferResult) {
+                if (resultBufferResult.getMetadataBuffer().getCount() > 0) {
+                    DriveFile driveFile = Drive.DriveApi.getFile(googleClient, resultBufferResult.getMetadataBuffer().get(0).getDriveId());
+                    driveFile.open(googleClient, DriveFile.MODE_READ_ONLY, null)
+                            .setResultCallback(new ResultCallback<DriveApi.DriveContentsResult>() {
+                                @Override
+                                public void onResult(DriveApi.DriveContentsResult driveContentsResult) {
+                                    try {
+                                        InputStream is = driveContentsResult.getDriveContents().getInputStream();
+                                        FormTemplateManager.loadForm(is);
+                                        LocalDriver.save(FormTemplateManager.getFormTemplate(),GoogleFileType.FORM,formName);
+                                        goBackToMain(activity);
+                                    } catch (Throwable th) {
+                                        String errorStr = "Unable to retrieve form " + formName + " because " + th + " Retrieving from local drive";
+                                        Toast.makeText(activity, errorStr, Toast.LENGTH_LONG).show();
+                                        Log.e(MainActivity.PT_APP_INFO, errorStr);
                                     }
-                                });
+                                }
+                            });
 
-                    }
-                }});
+                }
+            }
+        });
     }
+
+    private void goBackToMain(Activity activity){
+        Intent intent = new Intent(activity, MainActivity.class);
+        activity.startActivity(intent);
+        activity.finish();
+    }
+
+
+    private boolean loadFormFromLocalStorage(Activity activity, String formName){
+        try {
+            InputStream is=LocalDriver.getLocalInputStream(formName);
+            if ( is != null ) {
+                FormTemplateManager.loadForm(is);
+                return true;
+            }else{
+                return false;
+            }
+        } catch (Exception ex) {
+            Log.e(MainActivity.PT_APP_INFO, "Could not load form from local repository because " + ex);
+            return false;
+        }finally{
+            goBackToMain(activity);
+        }
+    }
+
 
 }

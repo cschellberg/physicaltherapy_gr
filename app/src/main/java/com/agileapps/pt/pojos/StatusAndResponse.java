@@ -8,4 +8,12 @@ public class StatusAndResponse {
 		this.statusCode=statusCode;
 		this.message = message;
 	}
+
+	@Override
+	public String toString() {
+		return "StatusAndResponse{" +
+				"statusCode=" + statusCode +
+				", message='" + message + '\'' +
+				'}';
+	}
 }

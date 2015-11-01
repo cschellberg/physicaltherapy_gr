@@ -10,7 +10,7 @@ public class MapOfMaps {
     private Map<String,Map> rootMap=new HashMap<String,Map>();
 
     public void add(String  keys[]){
-             add(0,keys,rootMap);
+        add(0,keys,rootMap);
      }
 
     private void add(int index, String keys[], Map<String,Map> outerMap){

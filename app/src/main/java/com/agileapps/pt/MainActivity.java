@@ -21,6 +21,7 @@ import com.google.android.gms.drive.query.Filters;
 import com.google.android.gms.drive.query.Query;
 import com.google.android.gms.drive.query.SearchableField;
 import com.google.android.gms.plus.Plus;
+
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProviderInfo;
 import android.content.Context;
@@ -62,6 +63,7 @@ import com.google.android.gms.drive.DriveFolder;
 import org.simpleframework.xml.core.Persister;
 
 import java.io.IOException;
+import android.net.Uri;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -82,6 +84,7 @@ public class MainActivity extends FragmentActivity implements GoogleApiClient.Co
     public static final int REQUEST_AUTHORIZATION = 3;
     public static final int RESULT_STORE_FILE = 4;
     public static final String FORM_DIR = "pt_forms";
+    public static final String STORAGE_DIR = "pt_storage";
     static GoogleApiClient googleClient;
     private static final int RESOLVE_CONNECTION_REQUEST_CODE = 19;
     static int idCounter = 90000;
@@ -134,7 +137,7 @@ public class MainActivity extends FragmentActivity implements GoogleApiClient.Co
                     .addApi(Plus.API, Plus.PlusOptions.builder().build())
                     .addScope(Plus.SCOPE_PLUS_LOGIN);
             googleClient = builder.build();
-         } catch (Exception ex) {
+        } catch (Exception ex) {
             String errorStr = "Cannot initialize physical therapy because "
                     + ex.getMessage();
             Log.e(PT_APP_INFO, errorStr, ex);
@@ -148,6 +151,7 @@ public class MainActivity extends FragmentActivity implements GoogleApiClient.Co
     protected void onStart() {
         super.onStart();
         connectToGoogle();
+
     }
 
     @Override
@@ -191,6 +195,17 @@ public class MainActivity extends FragmentActivity implements GoogleApiClient.Co
             switch (item.getItemId()) {
                 case R.id.print_template:
                     try {
+                        Uri uri = (new Uri.Builder().path("https://drive.google.com/open?id=0B7X6OL988Y01T3FaQ1NEeW5Pcms")).build();
+                        /*Intent printIntent = new Intent(Intent.ACTION_SEND);
+                        printIntent.setPackage("com.google.android.apps.cloudprint");
+                        printIntent.setType("text/html");
+                        printIntent.putExtra(Intent.EXTRA_TITLE, "Print Test Title");
+                        printIntent.putExtra(Intent.EXTRA_STREAM, uri);
+                        startActivity(printIntent);
+                        Intent printIntent = new Intent(this, PrintDialogActivity.class);
+                        printIntent.setDataAndType(uri, "text/plain");
+                        printIntent.putExtra("title", "test");
+                        startActivity(printIntent);*/
                         PrintDocumentAdapter printDocumentAdapter = PDFWriter
                                 .getPrinterAdapter(this, formTemplate);
                         PrintManager printManager = (PrintManager) this
@@ -253,15 +268,15 @@ public class MainActivity extends FragmentActivity implements GoogleApiClient.Co
     }
 
 
-    private void saveForm(FormTemplate formTemplate)  {
+    private void saveForm(FormTemplate formTemplate) {
         try {
             FormTemplate formToSave = formTemplate;
             GoogleDriver googleDriver = GoogleDriver.getInstance(googleClient);
             googleDriver.saveOrUpdate(formToSave, googleClient, GoogleFileType.FORM);
-        }catch(Exception ex){
-            String errorStr="Cannot save form because " +ex;
-            Log.e(PT_APP_INFO,errorStr,ex);
-            Toast.makeText(this,errorStr,Toast.LENGTH_LONG).show();
+        } catch (Exception ex) {
+            String errorStr = "Cannot save form because " + ex;
+            Log.e(PT_APP_INFO, errorStr, ex);
+            Toast.makeText(this, errorStr, Toast.LENGTH_LONG).show();
         }
     }
 
@@ -336,10 +351,9 @@ public class MainActivity extends FragmentActivity implements GoogleApiClient.Co
     @Override
     public void onConnected(Bundle bundle) {
         Log.i(PT_APP_INFO, "Connected to drive");
-        try
-        {
-            GoogleDriver googleDriver=GoogleDriver.getInstance(googleClient);
-        } catch (Exception ex) {
+        try {
+            GoogleDriver googleDriver = GoogleDriver.getInstance(googleClient);
+            } catch (Exception ex) {
             String errorStr = "Cannot connect to google drive because "
                     + ex.getMessage();
             Log.e(PT_APP_INFO, errorStr, ex);
@@ -365,7 +379,7 @@ public class MainActivity extends FragmentActivity implements GoogleApiClient.Co
                 // Unable to resolve, message user appropriately
             }
         } else {
-             GooglePlayServicesUtil.getErrorDialog(connectionResult.getErrorCode(), this, 0).show();
+            GooglePlayServicesUtil.getErrorDialog(connectionResult.getErrorCode(), this, 0).show();
         }
     }
 
@@ -420,9 +434,8 @@ public class MainActivity extends FragmentActivity implements GoogleApiClient.Co
 
     }
 
-    private void connectToGoogle()
-    {
-        if ( ! googleClient.isConnected()){
+    private void connectToGoogle() {
+        if (!googleClient.isConnected()) {
             googleClient.connect();
         }
     }

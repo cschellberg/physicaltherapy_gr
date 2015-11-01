@@ -8,6 +8,7 @@ import java.util.List;
 import com.agileapps.pt.exceptions.GoogleDriverException;
 import com.agileapps.pt.manager.FormTemplateManager;
 import com.agileapps.pt.util.GoogleDriver;
+import com.agileapps.pt.util.LocalDriver;
 import com.agileapps.pt.util.MapOfMaps;
 import com.agileapps.pt.util.PhysicalTherapyUtils;
 
@@ -95,7 +96,6 @@ public class FormChooserActivity extends Activity {
 				}
 				try {
 					GoogleDriver.getInstance(MainActivity.googleClient).loadForm(MainActivity.googleClient,FormChooserActivity.this, fileString);
-					finish();
 				} catch (Exception ex) {
 					String errorStr="Unable to retrieve form because "+ex;
 					Toast.makeText(FormChooserActivity.this,errorStr, Toast.LENGTH_LONG).show();
@@ -128,6 +128,11 @@ public class FormChooserActivity extends Activity {
 		List<String> clientList = new ArrayList<String>();
 		clientList.add(NONE_SELECTED);
 		try {
+			List<String>formList=GoogleDriver.
+					getInstance(MainActivity.googleClient).getAllForms(MainActivity.googleClient);
+			if (formList.isEmpty() ){
+				formList= LocalDriver.getAllForms();
+			}
 			mapOfMaps=PhysicalTherapyUtils.getMapOfMaps(GoogleDriver.
 					getInstance(MainActivity.googleClient).getAllForms(MainActivity.googleClient));
 			clientList.addAll(mapOfMaps.get().keySet());

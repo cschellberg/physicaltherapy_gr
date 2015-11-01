@@ -141,10 +141,13 @@ public class FormTemplateManager {
 
 	public static void loadForm(InputStream is) throws FileNotFoundException,
 			Exception {
-		FormTemplate formTemplate = PhysicalTherapyUtils
-				.parseFormTemplate(is);
-		temporaryFormTemplateOverride=formTemplate.getFormName();
-		currentFormTemplate=formTemplate;
+		    if ( is == null){
+				Log.e(MainActivity.PT_APP_INFO,"Cannot load form because input stream is null");
+			}
+			FormTemplate formTemplate = PhysicalTherapyUtils
+					.parseFormTemplate(is);
+			temporaryFormTemplateOverride = formTemplate.getFormName();
+			currentFormTemplate = formTemplate;
 	}
 
 

@@ -38,11 +38,11 @@ public class TemplatesRetrieverTask extends
 					.append(config.getCompany());
 			StatusAndResponse statusAndResponse = HttpUtils.getHttpResponse(sb
 					.toString());
+			Log.i(MainActivity.PT_APP_INFO,"Retreived templates "+statusAndResponse);
 			return statusAndResponse;
 		} catch (Exception ex) {
 			String errorStr = "Unable to get templates because " + ex;
 			Log.e(MainActivity.PT_APP_INFO, errorStr);
-			statusView.setText(errorStr);
 			return new StatusAndResponse(-1, errorStr);
 		}
 	}

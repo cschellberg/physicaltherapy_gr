@@ -213,8 +213,8 @@ public class PDFWriter {
 		public String toString() {
 			return "XY [x=" + x + ", y=" + y + "]";
 		}
-		
-		
+
+
 	}
 
 }

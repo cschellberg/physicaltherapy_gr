@@ -104,6 +104,7 @@ public class FormTemplate {
 		this.permanent = permanent;
 	}
 
+
 	public List<FormTemplatePart> getFormTemplatePartList() {
 		return formTemplatePartList;
 	}
